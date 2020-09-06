@@ -20,6 +20,7 @@ app.use(bodyParser({ extended: true }))
 app.use(bodyParser.json())
 app.use('/api/v1/', routes)
 
+// Error Handling Middleware
 app.use((err, req, res, next) => {
     res.status(400).json({
         msg: 'There was some problem in the server. Please try again later',
