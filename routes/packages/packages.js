@@ -123,4 +123,16 @@ router.get('/test', (req, res) => {
     res.send('All working good')
 })
 
+router.delete('/removePackage/:pkgId', async (req, res) => {
+    let pkgId = req.params.pkgId
+    try {
+        await Package.deleteOne({ _id: pkgId });
+        res.sendStatus(200)
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500)
+    }
+}
+)
+
 module.exports = router
