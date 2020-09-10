@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken')
 router.post('/adminAuth', (req, res) => {
     let admin = req.body
 
+    console.log(req.body)
+
     let validate = validateAdmin(admin)
 
     if (validate.result == true) {
@@ -19,7 +21,7 @@ router.post('/adminAuth', (req, res) => {
                 process.env.JWT_PASS
             )
 
-            res.send({
+            res.json({
                 token: token,
                 result: true,
                 msg: 'Login successfully completed',
