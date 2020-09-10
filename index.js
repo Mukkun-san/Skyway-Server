@@ -21,22 +21,6 @@ app.use(bodyParser.json())
 app.use('/api/v1/', routes)
 app.use(express.static('public'))
 
-const fileUpload = require('express-fileupload');
-
-app.use(fileUpload());
-
-app.post('/upload', function (req, res) {
-
-    let image = req.files.images;
-
-    console.log(image);
-
-    image.forEach(image => {
-        image.mv('./public/images/' + image.name)
-    });
-
-    res.send("done")
-});
 // Error Handling Middleware
 app.use((err, req, res, next) => {
     res.status(400).json({
@@ -46,6 +30,7 @@ app.use((err, req, res, next) => {
                 ? 'Cannot show errors in production '
                 : err.stack,
     })
+    next()
 })
 
 //Starting the server

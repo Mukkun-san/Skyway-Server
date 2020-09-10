@@ -12,13 +12,46 @@ let Booking = require('../../modals/packages/booking')
 
 const validateBookingInfo = require('../../validator/bookingInfoValidator')
 
+const fileUpload = require('express-fileupload');
+router.use(fileUpload());
+
+const randomstring = require("randomstring");
+
+router.post('/uploadGallery', function (req, res) {
+
+});
+
 router.post('/addPackage', (req, res) => {
-    let pkg = req.body
+    let pkg = JSON.parse(req.body.packageDetails);
+
+    if (req.files) {
+        let images = req.files.images;
+        const timestamp = Date.now();
+        let urls = [];
+
+        images.forEach((image, index) => {
+            let = extension = image.name.substr(image.name.lastIndexOf("."), image.name.length)
+            let path = "public/images/" + timestamp + '_' + randomstring.generate() + extension;
+            image.mv('./' + path)
+                .then(() => { })
+                .catch((err) => {
+                    console.log(err)
+                });
+            urls.push(path)
+        });
+        pkg.galleryImagesUrls = urls;
+        pkg.imageUrl = urls[0];
+        pkg.place = pkg.places;
+
+    } else {
+        res.send({ result: false, error: 'No Images Uploaded' })
+    }
+
     let validate = validatePackage(pkg)
 
     if (validate.result) {
         let aPackage = Package({
-            place: pkg.place,
+            place: toString(pkg.places),
             duration: pkg.duration,
             imageUrl: pkg.imageUrl,
             overview: pkg.overview,
@@ -29,36 +62,59 @@ router.post('/addPackage', (req, res) => {
         })
 
         for (let i = 0; i < pkg.pricing.length; i++) {
-            let aPricing = Pricing(pkg.pricing[i])
+            let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
             aPricing.save()
+                .then((res) => {
+
+                }).catch((err) => {
+                    console.log(err)
+                })
             aPackage.pricing.push(aPricing)
         }
 
         for (let j = 0; j < pkg.itinerary.length; j++) {
-            let aItinerary = Itinerary(pkg.itinerary[j])
+            let aItinerary = Itinerary({
+                place: pkg.itinerary.day + ": " + pkg.itineraryplace,
+                dec: pkg.itinerary.description
+            })
             aItinerary.save()
+                .then((res) => {
+
+                }).catch((err) => {
+                    console.log(err)
+                })
             aPackage.itinerary.push(aItinerary)
         }
 
         for (let k = 0; k < pkg.hotels.length; k++) {
             let aHotel = Hotel(pkg.hotels[k])
             aHotel.save()
+                .then((res) => {
+
+                }).catch((err) => {
+                    console.log(err)
+                })
             aPackage.hotels.push(aHotel)
         }
-
         aPackage.save()
+            .then((result) => {
+                res.json({
+                    msg: 'New package subbmitted successfully',
+                    result: result,
+                })
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
 
-        res.json({
-            msg: 'New package subbmitted successfully',
-            result: true,
-        })
-    } else {
+    else {
         res.status(400).json({
-            msg: 'Invalid request. Input data validatin failed',
+            msg: 'Invalid request. Input data validation failed',
             result: false,
             errors: validate.errors,
         })
     }
+
 })
 
 router.get('/getAllPackages', async (req, res) => {
