@@ -21,19 +21,19 @@ router.post('/adminAuth', (req, res) => {
                 process.env.JWT_PASS
             )
 
-            res.json({
+            res.send({
                 token: token,
                 result: true,
                 msg: 'Login successfully completed',
             })
         } else {
-            res.json({
+            res.send({
                 result: false,
                 msg: 'Invalid email or password',
             })
         }
     } else {
-        res.status(400).json({
+        res.status(400).send({
             msg: 'Admin validation failed',
             result: false,
             errors: validate.errors,
@@ -49,12 +49,12 @@ router.get('/adminVerifyToken/:token', (req, res) => {
         decoded.username === process.env.MASTER_USERNAME &&
         decoded.password === process.env.MASTER_PASSWORD
     ) {
-        res.json({
+        res.send({
             result: true,
             msg: 'Token verified successfully',
         })
     } else {
-        res.json({
+        res.send({
             result: false,
             msg: 'Token verification failed',
         })

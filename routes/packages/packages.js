@@ -98,7 +98,7 @@ router.post('/addPackage', (req, res) => {
         }
         aPackage.save()
             .then((result) => {
-                res.json({
+                res.send({
                     msg: 'New package subbmitted successfully',
                     result: result,
                 })
@@ -108,7 +108,7 @@ router.post('/addPackage', (req, res) => {
     }
 
     else {
-        res.status(400).json({
+        res.status(400).send({
             msg: 'Invalid request. Input data validation failed',
             result: false,
             errors: validate.errors,
@@ -162,12 +162,12 @@ router.post('/bookPackage', (req, res) => {
             }
         })
 
-        res.json({
+        res.send({
             result: true,
             msg: 'Booking data subbmitted sucessfully !!!',
         })
     } else {
-        res.status(400).json({
+        res.status(400).send({
             result: false,
             msg: 'Data validation failed',
             errors: validate.errors,
