@@ -31,13 +31,13 @@ router.post('/addPackage', (req, res) => {
 
         images.forEach((image, index) => {
             let = extension = image.name.substr(image.name.lastIndexOf("."), image.name.length)
-            let path = "public/images/" + timestamp + '_' + randomstring.generate() + extension;
-            image.mv('./' + path)
+            let path = "/images/" + timestamp + '_' + randomstring.generate() + extension;
+            image.mv('./public' + path)
                 .then(() => { })
                 .catch((err) => {
                     console.log(err)
                 });
-            urls.push(path)
+            urls.push("https://skyway-server.herokuapp.com" + path)
         });
         pkg.galleryImagesUrls = urls;
         pkg.imageUrl = urls[0];
