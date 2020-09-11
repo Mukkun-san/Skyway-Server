@@ -7,9 +7,9 @@ const jwt = require('jsonwebtoken')
 router.post('/adminAuth', (req, res) => {
     let admin = req.body
 
-    console.log(req.body)
 
     let validate = validateAdmin(admin)
+    console.log(validate)
 
     if (validate.result == true) {
         if (
