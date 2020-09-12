@@ -29,7 +29,7 @@ router.post('/addPackage', (req, res) => {
         images.forEach(image => {
             const timestamp = Date.now();
             const EXT = image.name.substr(image.name.lastIndexOf("."), image.name.length)
-            const PATH = "/images/" + timestamp + '_' + randomstring.generate() + EXT;
+            const PATH = "/images/" + pkg.packageName + '_' + timestamp + EXT;
 
             image.mv('./public' + PATH)
             urls.push("https://skyway-server.herokuapp.com" + PATH)
