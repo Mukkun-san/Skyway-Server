@@ -17,10 +17,6 @@ router.use(fileUpload());
 
 const randomstring = require("randomstring");
 
-router.post('/uploadGallery', function (req, res) {
-
-});
-
 router.post('/addPackage', (req, res) => {
     let pkg = JSON.parse(req.body.packageDetails);
 
@@ -41,7 +37,6 @@ router.post('/addPackage', (req, res) => {
         });
         pkg.galleryImagesUrls = urls;
         pkg.imageUrl = urls[0];
-        pkg.place = pkg.places;
 
     } else {
         res.send({ result: false, error: 'No Images Uploaded' })
@@ -74,12 +69,12 @@ router.post('/addPackage', (req, res) => {
 
         for (let j = 0; j < pkg.itinerary.length; j++) {
             let aItinerary = Itinerary({
-                place: pkg.itinerary.day + ": " + pkg.itineraryplace,
-                dec: pkg.itinerary.description
+                place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
+                dec: pkg.itinerary[j].description
             })
             aItinerary.save()
                 .then((res) => {
-
+                    console.log(res);
                 }).catch((err) => {
                     console.log(err)
                 })
