@@ -44,71 +44,73 @@ router.post('/addPackage', (req, res) => {
 
     let validate = validatePackage(pkg)
 
-    // if (validate.result) {
-    let aPackage = Package({
-        place: pkg.place,
-        duration: pkg.duration,
-        imageUrl: pkg.imageUrl,
-        overview: pkg.overview,
-        packageName: pkg.packageName,
-        galleryImagesUrls: pkg.galleryImagesUrls,
-        includeExclude: pkg.includeExclude,
-        description: pkg.description,
-    })
+    console.log(validate,pkg);
 
-    for (let i = 0; i < pkg.pricing.length; i++) {
-        let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
-        aPricing.save()
-            .then((res) => {
-
-            }).catch((err) => {
-                console.log(err)
-            })
-        aPackage.pricing.push(aPricing)
-    }
-
-    for (let j = 0; j < pkg.itinerary.length; j++) {
-        let aItinerary = Itinerary({
-            place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
-            dec: pkg.itinerary[j].description
+    if (validate.result) {
+        let aPackage = Package({
+            place: pkg.place,
+            duration: pkg.duration,
+            imageUrl: pkg.imageUrl,
+            overview: pkg.overview,
+            packageName: pkg.packageName,
+            galleryImagesUrls: pkg.galleryImagesUrls,
+            includeExclude: pkg.includeExclude,
+            description: pkg.description,
         })
-        aItinerary.save()
-            .then((res) => {
-                console.log(res);
+
+        for (let i = 0; i < pkg.pricing.length; i++) {
+            let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
+            aPricing.save()
+                .then((res) => {
+
+                }).catch((err) => {
+                    console.log(err)
+                })
+            aPackage.pricing.push(aPricing)
+        }
+
+        for (let j = 0; j < pkg.itinerary.length; j++) {
+            let aItinerary = Itinerary({
+                place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
+                dec: pkg.itinerary[j].description
+            })
+            aItinerary.save()
+                .then((res) => {
+                    console.log(res);
+                }).catch((err) => {
+                    console.log(err)
+                })
+            aPackage.itinerary.push(aItinerary)
+        }
+
+        for (let k = 0; k < pkg.hotels.length; k++) {
+            let aHotel = Hotel(pkg.hotels[k])
+            aHotel.save()
+                .then((res) => {
+
+                }).catch((err) => {
+                    console.log(err)
+                })
+            aPackage.hotels.push(aHotel)
+        }
+        aPackage.save()
+            .then((result) => {
+                res.send({
+                    msg: 'New package susbmitted successfully',
+                    result: result,
+                })
             }).catch((err) => {
                 console.log(err)
             })
-        aPackage.itinerary.push(aItinerary)
     }
 
-    for (let k = 0; k < pkg.hotels.length; k++) {
-        let aHotel = Hotel(pkg.hotels[k])
-        aHotel.save()
-            .then((res) => {
-
-            }).catch((err) => {
-                console.log(err)
-            })
-        aPackage.hotels.push(aHotel)
-    }
-    aPackage.save()
-        .then((result) => {
-            res.send({
-                msg: 'New package susbmitted successfully',
-                result: result,
-            })
-        }).catch((err) => {
-            console.log(err)
+    else {
+        res.status(400).send({
+            msg: 'Invalid request. Input data validation failed',
+            result: false,
+            errors: validate.errors,
         })
-    // }
-
-    // else {
-    //     res.send({
-    //         msg: 'Invalid request. Input data validation failed',
-    //         result: false,
-    //         errors: validate.errors,
-    //     })
-    // }
+    }
 
 })
 
