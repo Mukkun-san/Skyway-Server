@@ -107,6 +107,7 @@ router.post('/addPackage', (req, res) => {
             msg: 'Invalid request. Input data validation failed',
             result: false,
             errors: validate.errors,
+            pkg
         })
     }
 
