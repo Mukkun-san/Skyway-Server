@@ -21,20 +21,27 @@ router.post('/addPackage', (req, res) => {
     let pkg = JSON.parse(req.body.packageDetails);
 
     if (req.files) {
-        let images = req.files.images;
-        const timestamp = Date.now();
+        let images = []
+        const IMGS = req.files.images;
+        Array.isArray(IMGS) ? images = IMGS : images.push(IMGS);
         let urls = [];
 
-        images.forEach((image, index) => {
-            let = extension = image.name.substr(image.name.lastIndexOf("."), image.name.length)
-            let path = "/images/" + timestamp + '_' + randomstring.generate() + extension;
-            image.mv('./public' + path)
-                .then(() => { })
-                .catch((err) => {
-                    console.log(err)
-                });
-            urls.push("https://skyway-server.herokuapp.com" + path)
+        images.forEach(image => {
+            const timestamp = Date.now();
+            const EXT = image.name.substr(image.name.lastIndexOf("."), image.name.length)
+            const PATH = "/images/" + timestamp + '_' + randomstring.generate() + EXT;
+
+            try {
+                image.mv('./public' + PATH)
+                urls.push("https://skyway-server.herokuapp.com" + PATH)
+            } catch (error) {
+                console.log(error);
+            }
+
+            image.mv('./public' + PATH)
+            urls.push("https://skyway-server.herokuapp.com" + PATH)
         });
+
         pkg.galleryImagesUrls = urls;
         pkg.imageUrl = urls[0];
 
@@ -44,7 +51,7 @@ router.post('/addPackage', (req, res) => {
 
     let validate = validatePackage(pkg)
 
-    console.log(validate,pkg);
+    console.log(validate, pkg);
 
     if (validate.result) {
         let aPackage = Package({
@@ -103,9 +110,8 @@ router.post('/addPackage', (req, res) => {
                 console.log(err)
             })
     }
-
     else {
-        res.status(400).send({
+        res.send({
             msg: 'Invalid request. Input data validation failed',
             result: false,
             errors: validate.errors,
