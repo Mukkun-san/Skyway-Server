@@ -31,15 +31,9 @@ router.post('/addPackage', (req, res) => {
             const EXT = image.name.substr(image.name.lastIndexOf("."), image.name.length)
             const PATH = "/images/" + timestamp + '_' + randomstring.generate() + EXT;
 
-            try {
-                image.mv('./public' + PATH)
-                urls.push("https://skyway-server.herokuapp.com" + PATH)
-            } catch (error) {
-                console.log(error);
-            }
-
             image.mv('./public' + PATH)
             urls.push("https://skyway-server.herokuapp.com" + PATH)
+
         });
 
         pkg.galleryImagesUrls = urls;
