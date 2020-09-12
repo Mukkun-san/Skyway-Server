@@ -103,7 +103,7 @@ router.post('/addPackage', (req, res) => {
     // }
 
     // else {
-    //     res.status(400).send({
+    //     res.send({
     //         msg: 'Invalid request. Input data validation failed',
     //         result: false,
     //         errors: validate.errors,
