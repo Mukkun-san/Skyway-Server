@@ -46,7 +46,7 @@ router.post('/addPackage', (req, res) => {
 
     if (validate.result) {
         let aPackage = Package({
-            place: toString(pkg.places),
+            place: pkg.place,
             duration: pkg.duration,
             imageUrl: pkg.imageUrl,
             overview: pkg.overview,
@@ -94,7 +94,7 @@ router.post('/addPackage', (req, res) => {
         aPackage.save()
             .then((result) => {
                 res.send({
-                    msg: 'New package subbmitted successfully',
+                    msg: 'New package susbmitted successfully',
                     result: result,
                 })
             }).catch((err) => {
