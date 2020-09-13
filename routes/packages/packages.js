@@ -15,33 +15,8 @@ const validateBookingInfo = require('../../validator/bookingInfoValidator')
 const fileUpload = require('express-fileupload');
 router.use(fileUpload());
 
-const randomstring = require("randomstring");
-
 router.post('/addPackage', (req, res) => {
     let pkg = JSON.parse(req.body.packageDetails);
-
-    if (req.files) {
-        let images = []
-        const IMGS = req.files.images;
-        Array.isArray(IMGS) ? images = IMGS : images.push(IMGS);
-        let urls = [];
-
-        images.forEach(image => {
-            const timestamp = Date.now();
-            const EXT = image.name.substr(image.name.lastIndexOf("."), image.name.length)
-            const PATH = "/images/" + randomstring.generate() + '_' + timestamp + EXT;
-
-            image.mv('./public' + PATH)
-            urls.push("https://skyway-server.herokuapp.com" + PATH)
-
-        });
-
-        pkg.galleryImagesUrls = urls;
-        pkg.imageUrl = urls[0];
-
-    } else {
-        res.send({ result: false, error: 'No Images Uploaded' })
-    }
 
     let validate = validatePackage(pkg)
 

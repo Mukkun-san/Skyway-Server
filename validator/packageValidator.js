@@ -1,4 +1,3 @@
-let validator = require('validator')
 const isEmpty = require('is-empty')
 
 function validatePackage(package) {
