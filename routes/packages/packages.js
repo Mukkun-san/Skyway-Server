@@ -16,7 +16,8 @@ const fileUpload = require('express-fileupload');
 router.use(fileUpload());
 
 router.post('/addPackage', (req, res) => {
-    let pkg = JSON.parse(req.body.packageDetails);
+
+    let pkg = req.body;
 
     let validate = validatePackage(pkg)
 
