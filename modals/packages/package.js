@@ -47,6 +47,7 @@ let Package = mongoose.Schema({
         },
     ],
     description: String,
+    category: Array,
 })
 
 module.exports = mongoose.model('package', Package)

@@ -33,6 +33,7 @@ router.post('/addPackage', (req, res) => {
             galleryImagesUrls: pkg.galleryImagesUrls,
             includeExclude: pkg.includeExclude,
             description: pkg.description,
+            category: pkg.category,
         })
 
         for (let i = 0; i < pkg.pricing.length; i++) {
