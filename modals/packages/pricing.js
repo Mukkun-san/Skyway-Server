@@ -2,11 +2,7 @@ let mongoose = require('mongoose')
 
 let Pricing = mongoose.Schema({
     name: String,
-    cost: {
-        standard: String,
-        deluxe: String,
-        luxury: String,
-    },
+    cost: Object,
 })
 
 module.exports = mongoose.model('pricing', Pricing)

@@ -36,15 +36,44 @@ router.post('/addPackage', (req, res) => {
             category: pkg.category,
         })
 
-        for (let i = 0; i < pkg.pricing.length; i++) {
-            let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
-            aPricing.save()
-                .then((res) => {
+        if (pkg.category[0] === "JUNGLE LODGES") {
+            for (let i = 0; i < pkg.pricing.length; i++) {
+                let aPricing = Pricing(
+                    {
+                        name: pkg.pricing[i].pkgName,
+                        cost:
+                        {
+                            singleOcc:
+                            {
+                                weekday: pkg.pricing[i].singleOcc.weekday,
+                                weekend: pkg.pricing[i].singleOcc.weekend
+                            },
+                            doubleOcc:
+                            {
+                                weekday: pkg.pricing[i].doubleOcc.weekday,
+                                weekend: pkg.pricing[i].doubleOcc.weekend
+                            }
+                        }
+                    })
+                aPricing.save()
+                    .then((res) => {
 
-                }).catch((err) => {
-                    console.log(err)
-                })
-            aPackage.pricing.push(aPricing)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                aPackage.pricing.push(aPricing)
+            }
+        } else {
+            for (let i = 0; i < pkg.pricing.length; i++) {
+                let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
+                aPricing.save()
+                    .then((res) => {
+
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                aPackage.pricing.push(aPricing)
+            }
         }
 
         for (let j = 0; j < pkg.itinerary.length; j++) {
