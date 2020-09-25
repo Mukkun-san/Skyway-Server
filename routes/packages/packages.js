@@ -12,8 +12,123 @@ let Booking = require('../../modals/packages/booking')
 
 const validateBookingInfo = require('../../validator/bookingInfoValidator')
 
-const fileUpload = require('express-fileupload');
-router.use(fileUpload());
+router.post('/updatePackage', (req, res) => {
+
+    let pkg = req.body;
+
+    let validate = validatePackage(pkg)
+
+    console.log(validate, pkg);
+
+    if (validate.result) {
+        let aPackage = Package({
+            place: pkg.place,
+            duration: pkg.duration,
+            imageUrl: pkg.imageUrl,
+            overview: pkg.overview,
+            packageName: pkg.packageName,
+            galleryImagesUrls: pkg.galleryImagesUrls,
+            includeExclude: pkg.includeExclude,
+            description: pkg.description,
+            category: pkg.category,
+        })
+
+        if (pkg.updatePricing) {
+            if (pkg.category[0] === "JUNGLE LODGES") {
+                for (let i = 0; i < pkg.pricing.length; i++) {
+                    let aPricing = Pricing(
+                        {
+                            name: pkg.pricing[i].pkgName,
+                            cost:
+                            {
+                                singleOcc:
+                                {
+                                    weekday: pkg.pricing[i].singleOcc.weekday,
+                                    weekend: pkg.pricing[i].singleOcc.weekend
+                                },
+                                doubleOcc:
+                                {
+                                    weekday: pkg.pricing[i].doubleOcc.weekday,
+                                    weekend: pkg.pricing[i].doubleOcc.weekend
+                                }
+                            }
+                        })
+                    aPricing.save()
+                        .then((res) => {
+
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    aPackage.pricing.push(aPricing)
+                }
+            } else {
+                for (let i = 0; i < pkg.pricing.length; i++) {
+                    let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
+                    aPricing.save()
+                        .then((res) => {
+
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    aPackage.pricing.push(aPricing)
+                }
+            }
+        } else {
+            aPackage.pricing = pkg.pricing;
+        }
+
+        if (pkg.updateItinerary) {
+            for (let j = 0; j < pkg.itinerary.length; j++) {
+                let aItinerary = Itinerary({
+                    place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
+                    dec: pkg.itinerary[j].description
+                })
+                aItinerary.save()
+                    .then((res) => {
+                        console.log(res);
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                aPackage.itinerary.push(aItinerary)
+            }
+        } else {
+            aPackage.itinerary = pkg.itinerary;
+        }
+
+        if (pkg.updateHotels) {
+            for (let k = 0; k < pkg.hotels.length; k++) {
+                let aHotel = Hotel(pkg.hotels[k])
+                aHotel.save()
+                    .then((res) => {
+
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                aPackage.hotels.push(aHotel)
+            }
+        } else {
+            aPackage.hotels = pkg.hotels;
+        }
+
+        aPackage.save()
+            .then((result) => {
+                res.send({
+                    msg: 'New package susbmitted successfully',
+                    result: result,
+                })
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
+    else {
+        res.send({
+            msg: 'Invalid request. Input data validation failed',
+            result: false,
+            errors: validate.errors,
+        })
+    }
+
+})
 
 router.post('/addPackage', (req, res) => {
 
