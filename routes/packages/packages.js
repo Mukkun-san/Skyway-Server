@@ -9,6 +9,7 @@ let Pricing = require('../../modals/packages/pricing')
 let Itinerary = require('../../modals/packages/itinerary')
 let Hotel = require('../../modals/packages/hotels')
 let Booking = require('../../modals/packages/booking')
+let Meta = require('../../modals/packages/metaData')
 
 const validateBookingInfo = require('../../validator/bookingInfoValidator')
 
@@ -237,21 +238,54 @@ router.post('/addPackage', (req, res) => {
 
 router.get('/getAllPackages', async (req, res) => {
     try {
-        let pkg = await Package.find()
+        let pkgs = await Package.find()
             .populate('pricing')
             .populate('itinerary')
             .populate('hotels')
-        res.send(pkg)
+        let meta = await Meta.find({})
+        let newPkgs = pkgs.map((pkg) => {
+            let test = pkg
+            for (let i = 0; i < meta.length; i++) {
+                const mname = meta[i].package_name ? meta[i].package_name.toLowerCase() : meta[i].package_name;
+                const pname = pkg.packageName ? pkg.packageName.toLowerCase() : pkg.packageName;
+                const package_code = meta[i].package_code;
+                if (pname == mname) {
+                    test = { ...test._doc, package_code }
+                }
+            }
+            return test
+        })
+        res.send(newPkgs)
     } catch (err) {
         res.send(err)
     }
 })
 
-router.get('/getPackage/:pacId', (req, res) => {
+router.get('/getMetaData/:pkgName', (req, res) => {
+    let package_name = req.params.pkgName;
+    console.log(package_name);
+    Meta.findOne({ "package_name": new RegExp(`^${package_name}$`, 'i') }, (err, result) => {
+        if (!err) {
+            console.log(result);
+            res.send(result)
+        } else {
+            res.status(500).send(err)
+        }
+    })
+})
+
+
+router.get('/getPackage/:pacId', async (req, res) => {
     let pacId = req.params.pacId
 
-    Package.findById(pacId, (err, result) => {
+    let meta = await Meta.findOne({ "package_code": new RegExp(`^${pacId}$`, 'i') })
+
+
+    console.log(pacId);
+
+    Package.findOne({ "packageName": new RegExp(`^${meta.package_name}$`, 'i') }, (err, result) => {
         if (!err) {
+            console.log(result);
             res.send(result)
         } else {
             res.status(500).send(err)
