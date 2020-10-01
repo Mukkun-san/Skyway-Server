@@ -48,6 +48,10 @@ let Package = mongoose.Schema({
     ],
     description: String,
     category: Array,
+    imagesAltAttrs: Array,
+    seo: Object,
+    pkgcode: String,
+    priceStartsAt: String
 })
 
 module.exports = mongoose.model('package', Package)

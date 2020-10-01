@@ -19,8 +19,6 @@ router.post('/updatePackage', (req, res) => {
 
     let validate = validatePackage(pkg)
 
-    console.log(validate, pkg);
-
     if (validate.result) {
         let aPackage = Package({
             place: pkg.place,
@@ -32,9 +30,15 @@ router.post('/updatePackage', (req, res) => {
             includeExclude: pkg.includeExclude,
             description: pkg.description,
             category: pkg.category,
+            seo: pkg.seo,
+            pkgcode: pkg.seo.url,
+            imagesAltAttrs: pkg.imagesAltAttrs,
+            priceStartsAt: pkg.priceStartsAt
         })
 
-        if (pkg.updatePricing) {
+        if (pkg.pricing[0]._id) {
+            aPackage.pricing = pkg.pricing
+        } else {
             if (pkg.category[0] === "JUNGLE LODGES") {
                 for (let i = 0; i < pkg.pricing.length; i++) {
                     let aPricing = Pricing(
@@ -64,7 +68,7 @@ router.post('/updatePackage', (req, res) => {
                 }
             } else {
                 for (let i = 0; i < pkg.pricing.length; i++) {
-                    let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
+                    let aPricing = Pricing(pkg.pricing[i])
                     aPricing.save()
                         .then((res) => {
 
@@ -74,11 +78,12 @@ router.post('/updatePackage', (req, res) => {
                     aPackage.pricing.push(aPricing)
                 }
             }
-        } else {
-            aPackage.pricing = pkg.pricing;
         }
 
-        if (pkg.updateItinerary) {
+
+        if (pkg.itinerary[0]._id) {
+            aPackage.itinerary = pkg.itinerary
+        } else {
             for (let j = 0; j < pkg.itinerary.length; j++) {
                 let aItinerary = Itinerary({
                     place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
@@ -86,17 +91,17 @@ router.post('/updatePackage', (req, res) => {
                 })
                 aItinerary.save()
                     .then((res) => {
-                        console.log(res);
+                        // console.log(res);
                     }).catch((err) => {
                         console.log(err)
                     })
                 aPackage.itinerary.push(aItinerary)
             }
-        } else {
-            aPackage.itinerary = pkg.itinerary;
         }
 
-        if (pkg.updateHotels) {
+        if (pkg.hotels[0]._id) {
+            aPackage.hotels = pkg.hotels
+        } else {
             for (let k = 0; k < pkg.hotels.length; k++) {
                 let aHotel = Hotel(pkg.hotels[k])
                 aHotel.save()
@@ -107,10 +112,7 @@ router.post('/updatePackage', (req, res) => {
                     })
                 aPackage.hotels.push(aHotel)
             }
-        } else {
-            aPackage.hotels = pkg.hotels;
         }
-
         aPackage.save()
             .then((result) => {
                 res.send({
@@ -131,13 +133,37 @@ router.post('/updatePackage', (req, res) => {
 
 })
 
+router.get('/getAllPackages', async (req, res) => {
+    try {
+        let pkgs = await Package.find()
+            .populate('pricing')
+            .populate('itinerary')
+            .populate('hotels')
+        let meta = await Meta.find({})
+        let newPkgs = pkgs.map((pkg) => {
+            let test = pkg
+            for (let i = 0; i < meta.length; i++) {
+                const mname = meta[i].package_name ? meta[i].package_name.toLowerCase() : meta[i].package_name;
+                const pname = pkg.packageName ? pkg.packageName.toLowerCase() : pkg.packageName;
+                const package_code = meta[i].package_code;
+                if (pname == mname) {
+                    test = { ...test._doc, package_code }
+                }
+            }
+            return test
+        })
+        res.send(newPkgs)
+    } catch (err) {
+        res.send(err)
+    }
+
+})
+
 router.post('/addPackage', (req, res) => {
 
     let pkg = req.body;
 
     let validate = validatePackage(pkg)
-
-    console.log(validate, pkg);
 
     if (validate.result) {
         let aPackage = Package({
@@ -150,6 +176,10 @@ router.post('/addPackage', (req, res) => {
             includeExclude: pkg.includeExclude,
             description: pkg.description,
             category: pkg.category,
+            seo: pkg.seo,
+            pkgcode: pkg.seo.url,
+            imagesAltAttrs: pkg.imagesAltAttrs,
+            priceStartsAt: pkg.priceStartsAt
         })
 
         if (pkg.category[0] === "JUNGLE LODGES") {
@@ -181,7 +211,7 @@ router.post('/addPackage', (req, res) => {
             }
         } else {
             for (let i = 0; i < pkg.pricing.length; i++) {
-                let aPricing = Pricing({ name: pkg.pricing[i].noOfGuest, cost: { standard: pkg.pricing[i].stCost, deluxe: pkg.pricing[i].deCost, luxury: pkg.pricing[i].luCost } })
+                let aPricing = Pricing(pkg.pricing[i])
                 aPricing.save()
                     .then((res) => {
 
@@ -261,29 +291,12 @@ router.get('/getAllPackages', async (req, res) => {
     }
 })
 
-router.get('/getMetaData/:pkgName', (req, res) => {
-    let package_name = req.params.pkgName;
-    console.log(package_name);
-    Meta.findOne({ "package_name": new RegExp(`^${package_name}$`, 'i') }, (err, result) => {
-        if (!err) {
-            console.log(result);
-            res.send(result)
-        } else {
-            res.status(500).send(err)
-        }
-    })
-})
-
-
 router.get('/getPackage/:pacId', async (req, res) => {
     let pacId = req.params.pacId
 
-    let meta = await Meta.findOne({ "package_code": new RegExp(`^${pacId}$`, 'i') })
-
-
     console.log(pacId);
 
-    Package.findOne({ "packageName": new RegExp(`^${meta.package_name}$`, 'i') }, (err, result) => {
+    Package.findOne({ "pkgcode": new RegExp(`^${pacId}$`, 'i') }, (err, result) => {
         if (!err) {
             console.log(result);
             res.send(result)
