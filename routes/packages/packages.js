@@ -13,126 +13,6 @@ let Meta = require('../../modals/packages/metaData')
 
 const validateBookingInfo = require('../../validator/bookingInfoValidator')
 
-router.post('/updatePackage', (req, res) => {
-
-    let pkg = req.body;
-
-    let validate = validatePackage(pkg)
-
-    if (validate.result) {
-        let aPackage = Package({
-            place: pkg.place,
-            duration: pkg.duration,
-            imageUrl: pkg.imageUrl,
-            overview: pkg.overview,
-            packageName: pkg.packageName,
-            galleryImagesUrls: pkg.galleryImagesUrls,
-            includeExclude: pkg.includeExclude,
-            description: pkg.description,
-            category: pkg.category,
-            seo: pkg.seo,
-            pkgcode: pkg.seo.url,
-            imagesAltAttrs: pkg.imagesAltAttrs,
-            priceStartsAt: pkg.priceStartsAt
-        })
-
-        if (pkg.pricing[0]._id) {
-            aPackage.pricing = pkg.pricing
-        } else {
-            if (pkg.category[0] === "JUNGLE LODGES") {
-                for (let i = 0; i < pkg.pricing.length; i++) {
-                    let aPricing = Pricing(
-                        {
-                            name: pkg.pricing[i].pkgName,
-                            cost:
-                            {
-                                singleOcc:
-                                {
-                                    weekday: pkg.pricing[i].singleOcc.weekday,
-                                    weekend: pkg.pricing[i].singleOcc.weekend
-                                },
-                                doubleOcc:
-                                {
-                                    weekday: pkg.pricing[i].doubleOcc.weekday,
-                                    weekend: pkg.pricing[i].doubleOcc.weekend
-                                }
-                            }
-                        })
-                    aPricing.save()
-                        .then((res) => {
-
-                        }).catch((err) => {
-                            console.log(err)
-                        })
-                    aPackage.pricing.push(aPricing)
-                }
-            } else {
-                for (let i = 0; i < pkg.pricing.length; i++) {
-                    let aPricing = Pricing(pkg.pricing[i])
-                    aPricing.save()
-                        .then((res) => {
-
-                        }).catch((err) => {
-                            console.log(err)
-                        })
-                    aPackage.pricing.push(aPricing)
-                }
-            }
-        }
-
-
-        if (pkg.itinerary[0]._id) {
-            aPackage.itinerary = pkg.itinerary
-        } else {
-            for (let j = 0; j < pkg.itinerary.length; j++) {
-                let aItinerary = Itinerary({
-                    place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
-                    dec: pkg.itinerary[j].description
-                })
-                aItinerary.save()
-                    .then((res) => {
-                        // console.log(res);
-                    }).catch((err) => {
-                        console.log(err)
-                    })
-                aPackage.itinerary.push(aItinerary)
-            }
-        }
-
-        if (pkg.hotels[0]._id) {
-            aPackage.hotels = pkg.hotels
-        } else {
-            for (let k = 0; k < pkg.hotels.length; k++) {
-                let aHotel = Hotel(pkg.hotels[k])
-                aHotel.save()
-                    .then((res) => {
-
-                    }).catch((err) => {
-                        console.log(err)
-                    })
-                aPackage.hotels.push(aHotel)
-            }
-        }
-        aPackage.save()
-            .then((result) => {
-                res.send({
-                    msg: 'New package susbmitted successfully',
-                    result: result,
-                })
-            }).catch((err) => {
-                console.log(err)
-            })
-    }
-    else {
-        res.send({
-            msg: 'Invalid request. Input data validation failed',
-            result: false,
-            errors: validate.errors,
-        })
-    }
-
-})
-
 router.get('/getAllPackages', async (req, res) => {
     try {
         let pkgs = await Package.find()
@@ -163,6 +43,8 @@ router.post('/addPackage', (req, res) => {
 
     let pkg = req.body;
 
+    console.log(pkg);
+
     let validate = validatePackage(pkg)
 
     if (validate.result) {
@@ -182,68 +64,44 @@ router.post('/addPackage', (req, res) => {
             priceStartsAt: pkg.priceStartsAt
         })
 
-        if (pkg.category[0] === "JUNGLE LODGES") {
-            for (let i = 0; i < pkg.pricing.length; i++) {
-                let aPricing = Pricing(
-                    {
-                        name: pkg.pricing[i].pkgName,
-                        cost:
-                        {
-                            singleOcc:
-                            {
-                                weekday: pkg.pricing[i].singleOcc.weekday,
-                                weekend: pkg.pricing[i].singleOcc.weekend
-                            },
-                            doubleOcc:
-                            {
-                                weekday: pkg.pricing[i].doubleOcc.weekday,
-                                weekend: pkg.pricing[i].doubleOcc.weekend
-                            }
-                        }
-                    })
+        for (let i = 0; i < pkg.pricing.length; i++) {
+            let aPricing = Pricing(pkg.pricing[i])
+            if (!pkg.pricing[i]._id)
                 aPricing.save()
                     .then((res) => {
 
                     }).catch((err) => {
                         console.log(err)
                     })
-                aPackage.pricing.push(aPricing)
-            }
-        } else {
-            for (let i = 0; i < pkg.pricing.length; i++) {
-                let aPricing = Pricing(pkg.pricing[i])
-                aPricing.save()
-                    .then((res) => {
-
-                    }).catch((err) => {
-                        console.log(err)
-                    })
-                aPackage.pricing.push(aPricing)
-            }
+            aPackage.pricing.push(aPricing)
         }
 
         for (let j = 0; j < pkg.itinerary.length; j++) {
-            let aItinerary = Itinerary({
-                place: pkg.itinerary[j].day + ": " + pkg.itinerary[j].place,
-                dec: pkg.itinerary[j].description
-            })
-            aItinerary.save()
-                .then((res) => {
-                    console.log(res);
-                }).catch((err) => {
-                    console.log(err)
-                })
+            console.log(pkg.itinerary[j]);
+
+            let aItinerary = Itinerary(pkg.itinerary[j])
+
+            if (!pkg.itinerary[j]._id) {
+                aItinerary.save()
+                    .then((result) => {
+
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+            }
             aPackage.itinerary.push(aItinerary)
         }
 
         for (let k = 0; k < pkg.hotels.length; k++) {
             let aHotel = Hotel(pkg.hotels[k])
-            aHotel.save()
-                .then((res) => {
+            if (!pkg.hotels[k]) {
+                aHotel.save()
+                    .then((result) => {
 
-                }).catch((err) => {
-                    console.log(err)
-                })
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+            }
             aPackage.hotels.push(aHotel)
         }
         aPackage.save()
