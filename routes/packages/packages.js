@@ -94,7 +94,7 @@ router.post('/addPackage', (req, res) => {
 
         for (let k = 0; k < pkg.hotels.length; k++) {
             let aHotel = Hotel(pkg.hotels[k])
-            if (!pkg.hotels[k]) {
+            if (!pkg.hotels[k]._id) {
                 aHotel.save()
                     .then((result) => {
 
