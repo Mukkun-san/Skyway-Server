@@ -9,7 +9,6 @@ let Pricing = require('../../modals/packages/pricing')
 let Itinerary = require('../../modals/packages/itinerary')
 let Hotel = require('../../modals/packages/hotels')
 let Booking = require('../../modals/packages/booking')
-let Meta = require('../../modals/packages/metaData')
 
 const validateBookingInfo = require('../../validator/bookingInfoValidator')
 
@@ -19,20 +18,8 @@ router.get('/getAllPackages', async (req, res) => {
             .populate('pricing')
             .populate('itinerary')
             .populate('hotels')
-        let meta = await Meta.find({})
-        let newPkgs = pkgs.map((pkg) => {
-            let test = pkg
-            for (let i = 0; i < meta.length; i++) {
-                const mname = meta[i].package_name ? meta[i].package_name.toLowerCase() : meta[i].package_name;
-                const pname = pkg.packageName ? pkg.packageName.toLowerCase() : pkg.packageName;
-                const package_code = meta[i].package_code;
-                if (pname == mname) {
-                    test = { ...test._doc, package_code }
-                }
-            }
-            return test
-        })
-        res.send(newPkgs)
+
+        res.send(pkgs)
     } catch (err) {
         res.send(err)
     }
@@ -130,20 +117,8 @@ router.get('/getAllPackages', async (req, res) => {
             .populate('pricing')
             .populate('itinerary')
             .populate('hotels')
-        let meta = await Meta.find({})
-        let newPkgs = pkgs.map((pkg) => {
-            let test = pkg
-            for (let i = 0; i < meta.length; i++) {
-                const mname = meta[i].package_name ? meta[i].package_name.toLowerCase() : meta[i].package_name;
-                const pname = pkg.packageName ? pkg.packageName.toLowerCase() : pkg.packageName;
-                const package_code = meta[i].package_code;
-                if (pname == mname) {
-                    test = { ...test._doc, package_code }
-                }
-            }
-            return test
-        })
-        res.send(newPkgs)
+
+        res.send(pkgs)
     } catch (err) {
         res.send(err)
     }
