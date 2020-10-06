@@ -12,6 +12,49 @@ let Booking = require('../../modals/packages/booking')
 
 const validateBookingInfo = require('../../validator/bookingInfoValidator')
 
+const fs = require('fs');
+fs.readFile("D:/stuff/LIB/Downloads/package.json", (err, file) => {
+    let pkgs = (JSON.parse(file))[0].data
+    let apkg = {};
+    pkgs.forEach((pkg, i) => {
+        apkg = {
+            includeExclude: {
+                "include": [],
+                "exclude": []
+            },
+            galleryImagesUrls: [""],
+            pricing: ["5f7c88a908ea4d2df00a67b4"],
+            itinerary: ["5f7c88a908ea4d2df00a67b4"],
+            hotels: ["5f7c88a908ea4d2df00a67b4"],
+            category: ["HOLIDAYS", "Discover India Tours for Foreign tourists visiting India", "", ""],
+            imagesAltAttrs: [""],
+            place: pkg.place || "-",
+            duration: pkg.duration || "-",
+            imageUrl: "-",
+            overview: "<p>lsqknflsqnflnqsknf</p>\n",
+            packageName: pkg.packageName || "-",
+            description: pkg.description || "-",
+            seo: {
+                metaKeys: pkg.meta_keywords || "-",
+                metaDesc: pkg.meta_description || "-",
+                url: pkg.pkgcode || "-"
+            },
+            pkgcode: pkg.pkgcode || "-",
+            priceStartsAt: pkg.cover_price || "-",
+        }
+        const doc = new Package(apkg);
+        doc.save().then((result) => {
+            console.log("good")
+        }).catch((err) => {
+            if (i === 0) {
+                console.log(err);
+            }
+        });
+
+
+    })
+})
+
 router.get('/getAllPackages', async (req, res) => {
     try {
         let pkgs = await Package.find()
